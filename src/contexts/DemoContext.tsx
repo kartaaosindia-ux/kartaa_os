@@ -75,6 +75,7 @@ export interface DemoAlert {
   project_name: string;
   is_active: boolean;
   sector: DemoSector;
+  projectId: string;
 }
 
 export interface DemoKpi {
@@ -90,6 +91,12 @@ export interface DemoKpi {
   milestones_on_time: number;
   total_milestones: number;
   kartaa_score: number;
+}
+
+export interface ProjectVerificationBreakdown {
+  label: string;
+  score: number;
+  status: 'active' | 'delayed' | 'completed' | 'on-hold';
 }
 
 export const DEMO_PROJECTS: DemoProject[] = [
@@ -108,12 +115,17 @@ export const DEMO_PROJECTS: DemoProject[] = [
 ];
 
 export const DEMO_ALERTS: DemoAlert[] = [
-  { id: 'dalert-road-001', severity: 'high', message: 'NH-48 Bypass (Pkg-3): BOQ utilization at 94.2% — projected overrun by ₹28.4L', project_name: 'NH-48 Bypass', is_active: true, sector: 'roads' },
-  { id: 'dalert-road-002', severity: 'medium', message: 'Kundli–Manesar Expressway: SPI dropped to 0.96 — 2 milestones at risk this week', project_name: 'Kundli–Manesar Expressway', is_active: true, sector: 'roads' },
-  { id: 'dalert-ind-001', severity: 'high', message: 'Manesar Industrial Phase-II: No progress entry logged for 5 consecutive days', project_name: 'Manesar Industrial', is_active: true, sector: 'industrial_railway' },
-  { id: 'dalert-rail-001', severity: 'medium', message: 'KARTAA Rail Corridor: Track laying at Ch. 48+200 delayed — earthwork pending clearance', project_name: 'KARTAA Rail Corridor', is_active: true, sector: 'industrial_railway' },
-  { id: 'dalert-bld-001', severity: 'medium', message: 'Rohini Residential Block-A: Structural framing inspection overdue by 3 days', project_name: 'Rohini Residential', is_active: true, sector: 'building' },
-  { id: 'dalert-bld-002', severity: 'low', message: 'Commercial Plaza Dwarka: Foundation pouring scheduled — concrete delivery confirmation pending', project_name: 'Commercial Plaza Dwarka', is_active: true, sector: 'building' },
+  { id: 'dalert-road-001', severity: 'high', message: 'NH-48 Bypass (Pkg-3): BOQ utilization at 94.2% — projected overrun by ₹28.4L', project_name: 'NH-48 Bypass', is_active: true, sector: 'roads', projectId: 'proj-001' },
+  { id: 'dalert-road-002', severity: 'medium', message: 'Kundli–Manesar Expressway: SPI dropped to 0.96 — 2 milestones at risk this week', project_name: 'Kundli–Manesar Expressway', is_active: true, sector: 'roads', projectId: 'proj-003' },
+  { id: 'dalert-ind-001', severity: 'high', message: 'Manesar Industrial Phase-II: No progress entry logged for 5 consecutive days', project_name: 'Manesar Industrial', is_active: true, sector: 'industrial_railway', projectId: 'proj-002' },
+  { id: 'dalert-rail-001', severity: 'medium', message: 'KARTAA Rail Corridor: Track laying at Ch. 48+200 delayed — earthwork pending clearance', project_name: 'KARTAA Rail Corridor', is_active: true, sector: 'industrial_railway', projectId: 'proj-006' },
+  // Skyline Commercial Tower alerts
+  { id: 'dalert-bld-sky-001', severity: 'high', message: 'Skyline Commercial Tower: Tower A — Floor 12 structural inspection overdue by 4 days', project_name: 'Skyline Commercial Tower', is_active: true, sector: 'building', projectId: 'proj-bld-001' },
+  { id: 'dalert-bld-sky-002', severity: 'medium', message: 'Skyline Commercial Tower: Concrete cube test results pending for Basement Level 2 pour', project_name: 'Skyline Commercial Tower', is_active: true, sector: 'building', projectId: 'proj-bld-001' },
+  // Rohini Residential alerts
+  { id: 'dalert-bld-001', severity: 'medium', message: 'Rohini Residential Block-A: Structural framing inspection overdue by 3 days', project_name: 'Rohini Residential', is_active: true, sector: 'building', projectId: 'proj-bld-002' },
+  // Commercial Plaza alerts
+  { id: 'dalert-bld-002', severity: 'low', message: 'Commercial Plaza Dwarka: Foundation pouring scheduled — concrete delivery confirmation pending', project_name: 'Commercial Plaza Dwarka', is_active: true, sector: 'building', projectId: 'proj-bld-003' },
 ];
 
 export const DEMO_KPIS: Record<NonNullable<DemoSector>, DemoKpi> = {
@@ -132,4 +144,100 @@ export const DEMO_KPIS: Record<NonNullable<DemoSector>, DemoKpi> = {
     boq_utilization: 54.1, boq_consumed_cr: 1.52, avg_spi: 0.86, cost_variance_cr: 0.48,
     milestone_adherence: 74.1, milestones_on_time: 8, total_milestones: 11, kartaa_score: 75,
   },
+};
+
+// ─── Per-project KPIs (strict project-level scoping) ─────────────────────────
+export const PROJECT_KPIS: Record<string, DemoKpi> = {
+  // Roads
+  'proj-001': {
+    active_sites: 1, total_sites: 1, pending_verifications: 3, overdue_verifications: 1,
+    boq_utilization: 94.2, boq_consumed_cr: 1.84, avg_spi: 0.88, cost_variance_cr: 0.28,
+    milestone_adherence: 75.0, milestones_on_time: 3, total_milestones: 4, kartaa_score: 82,
+  },
+  'proj-003': {
+    active_sites: 1, total_sites: 1, pending_verifications: 5, overdue_verifications: 1,
+    boq_utilization: 52.8, boq_consumed_cr: 1.00, avg_spi: 0.96, cost_variance_cr: 0.64,
+    milestone_adherence: 83.3, milestones_on_time: 5, total_milestones: 6, kartaa_score: 91,
+  },
+  // Industrial
+  'proj-002': {
+    active_sites: 1, total_sites: 1, pending_verifications: 6, overdue_verifications: 2,
+    boq_utilization: 44.1, boq_consumed_cr: 1.21, avg_spi: 0.71, cost_variance_cr: 0.80,
+    milestone_adherence: 57.1, milestones_on_time: 4, total_milestones: 7, kartaa_score: 61,
+  },
+  'proj-006': {
+    active_sites: 1, total_sites: 1, pending_verifications: 2, overdue_verifications: 0,
+    boq_utilization: 91.2, boq_consumed_cr: 1.40, avg_spi: 0.99, cost_variance_cr: 0.12,
+    milestone_adherence: 85.7, milestones_on_time: 6, total_milestones: 7, kartaa_score: 88,
+  },
+  'proj-008': {
+    active_sites: 1, total_sites: 1, pending_verifications: 3, overdue_verifications: 1,
+    boq_utilization: 31.2, boq_consumed_cr: 1.00, avg_spi: 0.74, cost_variance_cr: 0.52,
+    milestone_adherence: 50.0, milestones_on_time: 2, total_milestones: 4, kartaa_score: 65,
+  },
+  // Building — Skyline Commercial Tower
+  'proj-bld-001': {
+    active_sites: 1, total_sites: 1, pending_verifications: 4, overdue_verifications: 1,
+    boq_utilization: 48.5, boq_consumed_cr: 0.82, avg_spi: 0.91, cost_variance_cr: 0.18,
+    milestone_adherence: 72.7, milestones_on_time: 8, total_milestones: 11, kartaa_score: 79,
+  },
+  'proj-bld-002': {
+    active_sites: 1, total_sites: 1, pending_verifications: 2, overdue_verifications: 0,
+    boq_utilization: 58.3, boq_consumed_cr: 0.46, avg_spi: 0.89, cost_variance_cr: 0.14,
+    milestone_adherence: 80.0, milestones_on_time: 4, total_milestones: 5, kartaa_score: 76,
+  },
+  'proj-bld-003': {
+    active_sites: 1, total_sites: 1, pending_verifications: 1, overdue_verifications: 0,
+    boq_utilization: 31.7, boq_consumed_cr: 0.24, avg_spi: 0.74, cost_variance_cr: 0.16,
+    milestone_adherence: 60.0, milestones_on_time: 3, total_milestones: 5, kartaa_score: 65,
+  },
+};
+
+// ─── Per-project verification breakdown for KartaaScoreCard ──────────────────
+export const PROJECT_SCORE_BREAKDOWN: Record<string, ProjectVerificationBreakdown[]> = {
+  // Skyline Commercial Tower — Phase 1
+  'proj-bld-001': [
+    { label: 'Tower A — Floor Status (1–12)', score: 84, status: 'active' },
+    { label: 'Concrete Cube Tests (28-day)', score: 71, status: 'delayed' },
+    { label: 'Structural Compliance Checks', score: 79, status: 'active' },
+    { label: 'Basement Waterproofing Verify', score: 88, status: 'completed' },
+  ],
+  'proj-bld-002': [
+    { label: 'Block-A Framing Inspection', score: 76, status: 'active' },
+    { label: 'Rebar Placement Verification', score: 82, status: 'active' },
+    { label: 'Plinth Beam Compliance', score: 69, status: 'delayed' },
+  ],
+  'proj-bld-003': [
+    { label: 'Foundation Pour Verification', score: 65, status: 'active' },
+    { label: 'Column Casting Compliance', score: 58, status: 'delayed' },
+    { label: 'Soil Bearing Capacity Tests', score: 72, status: 'active' },
+  ],
+  // Roads
+  'proj-001': [
+    { label: 'Subgrade Compaction (Ch. 42–55)', score: 88, status: 'active' },
+    { label: 'Granular Sub-Base Layer', score: 79, status: 'active' },
+    { label: 'Bituminous Concrete QC', score: 74, status: 'delayed' },
+    { label: 'Drainage Structure Checks', score: 86, status: 'active' },
+  ],
+  'proj-003': [
+    { label: 'Earthwork Compaction Tests', score: 94, status: 'active' },
+    { label: 'Pavement Thickness Verify', score: 88, status: 'active' },
+    { label: 'Bridge Deck Compliance', score: 91, status: 'active' },
+  ],
+  // Industrial
+  'proj-002': [
+    { label: 'Structural Steel Erection', score: 61, status: 'delayed' },
+    { label: 'Foundation Bolt Verification', score: 58, status: 'delayed' },
+    { label: 'Roofing Sheet Compliance', score: 64, status: 'active' },
+  ],
+  'proj-006': [
+    { label: 'Pre-Eng. Building Erection', score: 91, status: 'completed' },
+    { label: 'Flooring & Hardener Tests', score: 88, status: 'completed' },
+    { label: 'Fire Safety Compliance', score: 85, status: 'active' },
+  ],
+  'proj-008': [
+    { label: 'Piling & Foundation Works', score: 62, status: 'active' },
+    { label: 'Structural Frame Compliance', score: 58, status: 'delayed' },
+    { label: 'MEP Rough-In Verification', score: 71, status: 'active' },
+  ],
 };

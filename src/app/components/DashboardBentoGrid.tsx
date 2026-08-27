@@ -4,7 +4,8 @@ import KpiCard from './KpiCard';
 import KartaaScoreCard from './KartaaScoreCard';
 import { createClient } from '@/lib/supabase/client';
 import { useRealtimeKartaa } from '@/hooks/useRealtimeKartaa';
-import { useDemo, DEMO_KPIS } from '@/contexts/DemoContext';
+import { useDemo, DEMO_KPIS, PROJECT_KPIS } from '@/contexts/DemoContext';
+import { useProject } from '@/contexts/ProjectContext';
 import { RefreshCw } from 'lucide-react';
 
 interface KpiData {
@@ -34,11 +35,18 @@ export default function DashboardBentoGrid() {
   const [lastUpdated, setLastUpdated] = useState<string>('');
   const supabase = createClient();
   const { isDemoUser, demoSector } = useDemo();
+  const { selectedProject } = useProject();
 
   const fetchKpis = async () => {
-    // Demo mode: use sector-scoped KPIs
+    // Demo mode: use per-project KPIs for the active project
     if (isDemoUser && demoSector) {
-      setKpi(DEMO_KPIS[demoSector]);
+      const projectKpi = PROJECT_KPIS[selectedProject.id];
+      if (projectKpi) {
+        setKpi(projectKpi);
+      } else if (demoSector) {
+        // Fallback to sector-level if no project-specific KPI defined
+        setKpi(DEMO_KPIS[demoSector]);
+      }
       return;
     }
 
@@ -60,7 +68,7 @@ export default function DashboardBentoGrid() {
 
   useEffect(() => {
     fetchKpis();
-  }, [isDemoUser, demoSector]);
+  }, [isDemoUser, demoSector, selectedProject.id]);
 
   useRealtimeKartaa({
     table: 'dashboard_kpis',
@@ -85,7 +93,7 @@ export default function DashboardBentoGrid() {
           <RefreshCw size={10} className="text-success animate-pulse" />
           <span>
             {isDemoUser
-              ? `Demo KPIs — ${demoSector?.replace('_', ' & ')} sector`
+              ? `KPIs — ${selectedProject.name}`
               : `KPIs live — last updated ${lastUpdated}`}
           </span>
         </div>

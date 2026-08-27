@@ -4,6 +4,7 @@ import { AlertTriangle, X, ChevronRight, RefreshCw } from 'lucide-react';
 import { createClient } from '../../lib/supabase/client';
 import { useRealtimeKartaa } from '@/hooks/useRealtimeKartaa';
 import { useDemo, DEMO_ALERTS } from '@/contexts/DemoContext';
+import { useProject } from '@/contexts/ProjectContext';
 
 interface Alert {
   id: string;
@@ -19,12 +20,15 @@ export default function AlertPanel() {
   const [loading, setLoading] = useState(true);
   const supabase = createClient();
   const { isDemoUser, demoSector } = useDemo();
+  const { selectedProject } = useProject();
 
   const fetchAlerts = async () => {
-    // Demo mode: use sector-filtered demo alerts
+    // Demo mode: filter alerts strictly by active project id
     if (isDemoUser && demoSector) {
-      const sectorAlerts = DEMO_ALERTS.filter((a) => a.sector === demoSector);
-      setAlerts(sectorAlerts);
+      const projectAlerts = DEMO_ALERTS.filter(
+        (a) => a.projectId === selectedProject.id
+      );
+      setAlerts(projectAlerts);
       setLoading(false);
       return;
     }
@@ -57,7 +61,7 @@ export default function AlertPanel() {
   useEffect(() => {
     setDismissed([]);
     fetchAlerts();
-  }, [isDemoUser, demoSector]);
+  }, [isDemoUser, demoSector, selectedProject.id]);
 
   // Real-time: only for non-demo users
   useRealtimeKartaa({
@@ -112,7 +116,7 @@ export default function AlertPanel() {
       ))}
       <div className="flex items-center gap-1.5 text-2xs text-muted-foreground px-1">
         <RefreshCw size={10} className="text-success animate-pulse" />
-        <span>{isDemoUser ? `Demo alerts — ${demoSector?.replace('_', ' & ')} sector` : 'Live alerts — auto-refreshes via WebSocket'}</span>
+        <span>{isDemoUser ? `Alerts — ${selectedProject.name}` : 'Live alerts — auto-refreshes via WebSocket'}</span>
       </div>
     </div>
   );

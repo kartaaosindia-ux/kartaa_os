@@ -1,7 +1,8 @@
 'use client';
 import React from 'react';
 import { ShieldCheck, Info } from 'lucide-react';
-import { useDemo, DEMO_PROJECTS } from '@/contexts/DemoContext';
+import { useDemo, PROJECT_SCORE_BREAKDOWN, DEMO_PROJECTS } from '@/contexts/DemoContext';
+import { useProject } from '@/contexts/ProjectContext';
 
 const FALLBACK_SCORES = [
   { id: 'proj-score-001', name: 'NH-48 Bypass Pkg-3', score: 82, status: 'active' as const },
@@ -33,13 +34,30 @@ function ScoreBar({ score, id }: { score: number; id: string }) {
 }
 
 export default function KartaaScoreCard() {
-  const { isDemoUser, demoSector } = useDemo();
+  const { isDemoUser } = useDemo();
+  const { selectedProject } = useProject();
 
-  // Use sector-filtered demo projects when in demo mode
-  const projectScores = isDemoUser && demoSector
-    ? DEMO_PROJECTS
-        .filter((p) => p.sector === demoSector)
-        .map((p) => ({ id: p.id, name: p.name, score: p.kartaa_score, status: p.status }))
+  // In demo mode: show per-project verification breakdown for the active project
+  const projectBreakdown = isDemoUser
+    ? PROJECT_SCORE_BREAKDOWN[selectedProject.id] ?? null
+    : null;
+
+  // Fallback to sector-level project list if no breakdown defined
+  const demoProjectEntry = isDemoUser
+    ? DEMO_PROJECTS.find((p) =>
+        p.name.toLowerCase().includes(selectedProject.name.toLowerCase().split(' ')[0])
+      ) ?? null
+    : null;
+
+  const projectScores = isDemoUser
+    ? projectBreakdown
+      ? projectBreakdown.map((item, i) => ({
+          id: `${selectedProject.id}-breakdown-${i}`,
+          name: item.label,
+          score: item.score,
+          status: item.status,
+        }))
+      : [{ id: selectedProject.id, name: selectedProject.name, score: demoProjectEntry?.kartaa_score ?? 75, status: 'active' as const }]
     : FALLBACK_SCORES;
 
   const avgScore = projectScores.length > 0
@@ -59,14 +77,18 @@ export default function KartaaScoreCard() {
             <span className="text-hero-metric font-tabular text-foreground">{avgScore}</span>
             <span className="text-sm text-muted-foreground mb-1.5">/100 avg</span>
           </div>
-          <p className="text-xs text-muted-foreground mt-0.5">Composite: evidence quality × BOQ match × schedule adherence</p>
+          {isDemoUser ? (
+            <p className="text-xs text-muted-foreground mt-0.5 truncate max-w-[220px]">{selectedProject.name}</p>
+          ) : (
+            <p className="text-xs text-muted-foreground mt-0.5">Composite: evidence quality × BOQ match × schedule adherence</p>
+          )}
         </div>
         <div className="w-12 h-12 rounded-xl bg-accent/10 border border-accent/20 flex items-center justify-center flex-shrink-0">
           <ShieldCheck size={22} className="text-accent" />
         </div>
       </div>
 
-      {/* Per-project scores */}
+      {/* Per-project verification breakdown */}
       <div className="space-y-2.5 flex-1">
         {projectScores.map((p) => (
           <div key={p.id} className="space-y-1">
@@ -87,7 +109,7 @@ export default function KartaaScoreCard() {
 
       <div className="pt-2 border-t border-border flex items-center justify-between">
         <span className="text-xs text-muted-foreground">Assisted verification — not automated certification</span>
-        <span className="text-xs text-accent font-500">{projectScores.length} active</span>
+        <span className="text-xs text-accent font-500">{projectScores.length} checks</span>
       </div>
     </div>
   );

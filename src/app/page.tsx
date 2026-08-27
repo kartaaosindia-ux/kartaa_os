@@ -60,7 +60,7 @@ export default function DashboardPage() {
     <AppLayout currentPath="/">
       <Topbar
         title="Dashboard"
-        subtitle={`${selectedProject?.name} · ${selectedProject?.code} · Last updated 23 Aug 2026, 18:42 IST`}
+        subtitle={`${selectedProject?.name} · ${selectedProject?.location} · ${selectedProject?.code}`}
         actions={<DashboardHeaderActions />}
       />
       <div className="px-6 xl:px-8 2xl:px-10 py-6 max-w-screen-2xl mx-auto space-y-6">

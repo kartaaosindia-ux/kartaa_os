@@ -19,8 +19,10 @@ const canUseCookies = (() => {
 const fromCookies = () =>
   typeof document === 'undefined' ? [] :
   document.cookie.split(';').filter(Boolean).map((c) => {
-    const [name, ...parts] = c.trim().split('=');
-    return { name: name.trim(), value: decodeURIComponent(parts.join('=')) };
+    const idx = c.trim().indexOf('=');
+    const name = idx >= 0 ? c.trim().slice(0, idx) : c.trim();
+    const value = idx >= 0 ? decodeURIComponent(c.trim().slice(idx + 1)) : '';
+    return { name: name.trim(), value };
   }).filter((c) => c.name);
 
 const fromStorage = () => {
