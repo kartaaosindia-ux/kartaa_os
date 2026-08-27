@@ -1,8 +1,8 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { BOQ, BOQItem } from '@/lib/pdf-takeoff/types';
-import { Download, Printer, Copy, FileJson, FileSpreadsheet, File } from 'lucide-react';
+import { Printer, Copy, FileJson, FileSpreadsheet, File } from 'lucide-react';
 import {
   downloadBOQPDF,
   downloadBOQExcel,

@@ -3,12 +3,12 @@
 import React, { useState, useEffect } from 'react';
 import AppLayout from '@/components/AppLayout';
 import Topbar from '@/components/Topbar';
-import DashboardBentoGrid from './components/DashboardBentoGrid';
-import DashboardCharts from './components/DashboardCharts';
-import ProjectStatusTable from './components/ProjectStatusTable';
-import ActivityFeed from './components/ActivityFeed';
-import AlertPanel from './components/AlertPanel';
-import DashboardHeaderActions from './components/DashboardHeaderActions';
+import DashboardBentoGrid from '../components/DashboardBentoGrid';
+import DashboardCharts from '../components/DashboardCharts';
+import ProjectStatusTable from '../components/ProjectStatusTable';
+import ActivityFeed from '../components/ActivityFeed';
+import AlertPanel from '../components/AlertPanel';
+import DashboardHeaderActions from '../components/DashboardHeaderActions';
 import GuidedTour from '@/components/GuidedTour';
 import { useProject } from '@/contexts/ProjectContext';
 import { useAuth } from '@/contexts/AuthContext';
