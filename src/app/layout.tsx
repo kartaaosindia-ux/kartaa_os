@@ -6,6 +6,7 @@ import { Toaster } from 'sonner';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { ProjectProvider } from '@/contexts/ProjectContext';
 import { DemoProvider } from '@/contexts/DemoContext';
+import Navbar from '@/components/Navbar';
 
 const dmSans = DM_Sans({
   subsets: ['latin'],
@@ -36,6 +37,7 @@ export default function RootLayout({
         <AuthProvider>
           <DemoProvider>
             <ProjectProvider>
+              <Navbar />
               {children}
             </ProjectProvider>
           </DemoProvider>
