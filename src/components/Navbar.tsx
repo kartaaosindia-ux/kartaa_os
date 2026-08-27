@@ -3,8 +3,6 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { Menu, X, FileText } from 'lucide-react';
-import Icon from '@/components/ui/AppIcon';
-
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -30,16 +28,16 @@ export default function Navbar() {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-8">
-            {navItems?.map((item) => {
-              const Icon = item?.icon;
+            {navItems.map((item) => {
+              const Icon = item.icon;
               return (
                 <Link
-                  key={item?.href}
-                  href={item?.href}
+                  key={item.href}
+                  href={item.href}
                   className="flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400 transition-colors"
                 >
                   {Icon && <Icon className="w-4 h-4" />}
-                  {item?.label}
+                  {item.label}
                 </Link>
               );
             })}
@@ -61,17 +59,17 @@ export default function Navbar() {
         {/* Mobile Navigation */}
         {isOpen && (
           <div className="md:hidden pb-4 border-t border-gray-200 dark:border-gray-800">
-            {navItems?.map((item) => {
-              const Icon = item?.icon;
+            {navItems.map((item) => {
+              const Icon = item.icon;
               return (
                 <Link
-                  key={item?.href}
-                  href={item?.href}
+                  key={item.href}
+                  href={item.href}
                   className="flex items-center gap-2 block px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg dark:text-gray-300 dark:hover:bg-gray-800"
                   onClick={() => setIsOpen(false)}
                 >
                   {Icon && <Icon className="w-4 h-4" />}
-                  {item?.label}
+                  {item.label}
                 </Link>
               );
             })}
