@@ -1,7 +1,8 @@
 'use client';
 import React, { useState, useRef, useEffect } from 'react';
-import { Search, Bell, HelpCircle, ChevronDown, Building2, Route, Check } from 'lucide-react';
+import { Search, Bell, HelpCircle, ChevronDown, Building2, Route, Factory, Check } from 'lucide-react';
 import { useProject } from '@/contexts/ProjectContext';
+import { useDemo } from '@/contexts/DemoContext';
 
 interface TopbarProps {
   title: string;
@@ -9,8 +10,23 @@ interface TopbarProps {
   actions?: React.ReactNode;
 }
 
+const TYPE_ICON: Record<string, React.ReactNode> = {
+  Road: <Route size={11} />,
+  Industrial: <Factory size={11} />,
+  Building: <Building2 size={11} />,
+  Railway: <Route size={11} />,
+};
+
+const TYPE_DOT: Record<string, string> = {
+  Road: 'bg-amber-400',
+  Industrial: 'bg-primary',
+  Building: 'bg-accent',
+  Railway: 'bg-info',
+};
+
 export default function Topbar({ title, subtitle, actions }: TopbarProps) {
-  const { selectedProject, setSelectedProject, allProjects } = useProject();
+  const { selectedProject, setSelectedProject, sectorProjects } = useProject();
+  const { isDemoUser, demoSector } = useDemo();
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -25,8 +41,15 @@ export default function Topbar({ title, subtitle, actions }: TopbarProps) {
     return () => document.removeEventListener('mousedown', handleClick);
   }, [open]);
 
-  const roadProjects = allProjects.filter((p) => p.type === 'Road');
-  const industrialProjects = allProjects.filter((p) => p.type === 'Industrial');
+  // Group projects by type from the sector-filtered list
+  const projectsByType = sectorProjects.reduce<Record<string, typeof sectorProjects>>((acc, proj) => {
+    const key = proj.type;
+    if (!acc[key]) acc[key] = [];
+    acc[key].push(proj);
+    return acc;
+  }, {});
+
+  const typeGroups = Object.entries(projectsByType);
 
   return (
     <header className="h-14 md:h-16 border-b border-border bg-card/50 backdrop-blur-sm flex items-center px-3 md:px-6 gap-2 md:gap-4 flex-shrink-0 sticky top-0 z-10">
@@ -43,62 +66,47 @@ export default function Topbar({ title, subtitle, actions }: TopbarProps) {
           onClick={() => setOpen((v) => !v)}
           className="flex items-center gap-1.5 md:gap-2 px-2 md:px-3 py-1.5 md:py-2 rounded-lg border border-border bg-muted/40 hover:bg-muted transition-colors text-sm max-w-[140px] md:max-w-[220px]"
         >
-          <span className={`w-2 h-2 rounded-full flex-shrink-0 ${selectedProject.type === 'Road' ? 'bg-amber-400' : 'bg-primary'}`} />
+          <span className={`w-2 h-2 rounded-full flex-shrink-0 ${TYPE_DOT[selectedProject.type] ?? 'bg-primary'}`} />
           <span className="truncate font-500 text-foreground text-xs hidden sm:block">{selectedProject.name}</span>
           <ChevronDown size={13} className={`flex-shrink-0 text-muted-foreground transition-transform ${open ? 'rotate-180' : ''}`} />
         </button>
 
         {open && (
           <div className="absolute right-0 top-full mt-1.5 w-72 bg-card border border-border rounded-xl shadow-xl z-50 overflow-hidden">
-            {/* Road Projects */}
-            <div className="px-3 pt-3 pb-1">
-              <div className="flex items-center gap-1.5 text-2xs font-600 uppercase tracking-wider text-muted-foreground mb-1.5">
-                <Route size={11} />
-                Road Projects
+            {isDemoUser && demoSector && (
+              <div className="px-3 pt-2.5 pb-1.5 border-b border-border">
+                <span className="text-2xs font-600 uppercase tracking-wider text-accent">
+                  {demoSector.replace('_', ' & ')} sector
+                </span>
               </div>
-              {roadProjects.map((proj) => (
-                <button
-                  key={proj.id}
-                  onClick={() => { setSelectedProject(proj); setOpen(false); }}
-                  className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg hover:bg-muted transition-colors text-left group"
-                >
-                  <span className="w-2 h-2 rounded-full bg-amber-400 flex-shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <div className="text-xs font-500 text-foreground truncate">{proj.name}</div>
-                    <div className="text-2xs text-muted-foreground truncate">{proj.code} · {proj.subtitle}</div>
+            )}
+            {typeGroups.map(([type, projects], groupIdx) => (
+              <div key={type}>
+                {groupIdx > 0 && <div className="border-t border-border mx-3" />}
+                <div className="px-3 pt-3 pb-2">
+                  <div className="flex items-center gap-1.5 text-2xs font-600 uppercase tracking-wider text-muted-foreground mb-1.5">
+                    {TYPE_ICON[type] ?? <Building2 size={11} />}
+                    {type} Projects
                   </div>
-                  {selectedProject.id === proj.id && (
-                    <Check size={13} className="text-primary flex-shrink-0" />
-                  )}
-                </button>
-              ))}
-            </div>
-
-            <div className="border-t border-border mx-3" />
-
-            {/* Industrial Projects */}
-            <div className="px-3 pt-2 pb-3">
-              <div className="flex items-center gap-1.5 text-2xs font-600 uppercase tracking-wider text-muted-foreground mb-1.5">
-                <Building2 size={11} />
-                Industrial Projects
+                  {projects.map((proj) => (
+                    <button
+                      key={proj.id}
+                      onClick={() => { setSelectedProject(proj); setOpen(false); }}
+                      className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg hover:bg-muted transition-colors text-left group"
+                    >
+                      <span className={`w-2 h-2 rounded-full flex-shrink-0 ${TYPE_DOT[proj.type] ?? 'bg-primary'}`} />
+                      <div className="flex-1 min-w-0">
+                        <div className="text-xs font-500 text-foreground truncate">{proj.name}</div>
+                        <div className="text-2xs text-muted-foreground truncate">{proj.code} · {proj.subtitle}</div>
+                      </div>
+                      {selectedProject.id === proj.id && (
+                        <Check size={13} className="text-primary flex-shrink-0" />
+                      )}
+                    </button>
+                  ))}
+                </div>
               </div>
-              {industrialProjects.map((proj) => (
-                <button
-                  key={proj.id}
-                  onClick={() => { setSelectedProject(proj); setOpen(false); }}
-                  className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg hover:bg-muted transition-colors text-left group"
-                >
-                  <span className="w-2 h-2 rounded-full bg-primary flex-shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <div className="text-xs font-500 text-foreground truncate">{proj.name}</div>
-                    <div className="text-2xs text-muted-foreground truncate">{proj.code} · {proj.subtitle}</div>
-                  </div>
-                  {selectedProject.id === proj.id && (
-                    <Check size={13} className="text-primary flex-shrink-0" />
-                  )}
-                </button>
-              ))}
-            </div>
+            ))}
           </div>
         )}
       </div>

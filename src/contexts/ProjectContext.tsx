@@ -120,6 +120,7 @@ interface ProjectContextValue {
   selectedProject: ProjectDef;
   setSelectedProject: (project: ProjectDef) => void;
   allProjects: ProjectDef[];
+  sectorProjects: ProjectDef[];
   roadProjects: ProjectDef[];
   industrialProjects: ProjectDef[];
   buildingProjects: ProjectDef[];
@@ -129,6 +130,7 @@ const ProjectContext = createContext<ProjectContextValue>({
   selectedProject: ALL_PROJECTS[0],
   setSelectedProject: () => {},
   allProjects: ALL_PROJECTS,
+  sectorProjects: ALL_PROJECTS,
   roadProjects: ALL_PROJECTS.filter((p) => p.type === 'Road'),
   industrialProjects: ALL_PROJECTS.filter((p) => p.type === 'Industrial'),
   buildingProjects: ALL_PROJECTS.filter((p) => p.type === 'Building'),
@@ -186,12 +188,18 @@ export function ProjectProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  // Sector-scoped project list for demo users
+  const sectorProjects = demoSector
+    ? ALL_PROJECTS.filter((p) => p.sector === demoSector)
+    : ALL_PROJECTS;
+
   return (
     <ProjectContext.Provider
       value={{
         selectedProject,
         setSelectedProject,
         allProjects: ALL_PROJECTS,
+        sectorProjects,
         roadProjects: ALL_PROJECTS.filter((p) => p.type === 'Road'),
         industrialProjects: ALL_PROJECTS.filter((p) => p.type === 'Industrial'),
         buildingProjects: ALL_PROJECTS.filter((p) => p.type === 'Building'),

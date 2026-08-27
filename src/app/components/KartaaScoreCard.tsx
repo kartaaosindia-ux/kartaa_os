@@ -1,11 +1,13 @@
+'use client';
 import React from 'react';
 import { ShieldCheck, Info } from 'lucide-react';
+import { useDemo, DEMO_PROJECTS } from '@/contexts/DemoContext';
 
-const projectScores = [
-  { id: 'proj-score-001', name: 'NH-48 Bypass Pkg-3', score: 82, status: 'active' },
-  { id: 'proj-score-002', name: 'Manesar Industrial Ph-II', score: 61, status: 'delayed' },
-  { id: 'proj-score-003', name: 'Kundli–Manesar Expressway', score: 91, status: 'active' },
-  { id: 'proj-score-004', name: 'Faridabad Ring Road', score: 74, status: 'on-hold' },
+const FALLBACK_SCORES = [
+  { id: 'proj-score-001', name: 'NH-48 Bypass Pkg-3', score: 82, status: 'active' as const },
+  { id: 'proj-score-002', name: 'Manesar Industrial Ph-II', score: 61, status: 'delayed' as const },
+  { id: 'proj-score-003', name: 'Kundli–Manesar Expressway', score: 91, status: 'active' as const },
+  { id: 'proj-score-004', name: 'Faridabad Ring Road', score: 74, status: 'on-hold' as const },
 ];
 
 function ScoreBar({ score, id }: { score: number; id: string }) {
@@ -31,7 +33,18 @@ function ScoreBar({ score, id }: { score: number; id: string }) {
 }
 
 export default function KartaaScoreCard() {
-  const avgScore = Math.round(projectScores.reduce((s, p) => s + p.score, 0) / projectScores.length);
+  const { isDemoUser, demoSector } = useDemo();
+
+  // Use sector-filtered demo projects when in demo mode
+  const projectScores = isDemoUser && demoSector
+    ? DEMO_PROJECTS
+        .filter((p) => p.sector === demoSector)
+        .map((p) => ({ id: p.id, name: p.name, score: p.kartaa_score, status: p.status }))
+    : FALLBACK_SCORES;
+
+  const avgScore = projectScores.length > 0
+    ? Math.round(projectScores.reduce((s, p) => s + p.score, 0) / projectScores.length)
+    : 0;
 
   return (
     <div className="card-elevated card-hover h-full p-5 flex flex-col gap-4">
@@ -61,7 +74,8 @@ export default function KartaaScoreCard() {
               <span className="text-xs text-foreground/80 truncate max-w-[70%]">{p.name}</span>
               <span className={`text-2xs px-1.5 py-0.5 rounded-full font-500 ${
                 p.status === 'active' ? 'bg-accent/10 text-accent' :
-                p.status === 'delayed'? 'bg-danger/10 text-danger' : 'bg-warning/10 text-warning'
+                p.status === 'delayed' ? 'bg-danger/10 text-danger' :
+                p.status === 'completed' ? 'bg-primary/10 text-primary' : 'bg-warning/10 text-warning'
               }`}>
                 {p.status}
               </span>
@@ -73,7 +87,7 @@ export default function KartaaScoreCard() {
 
       <div className="pt-2 border-t border-border flex items-center justify-between">
         <span className="text-xs text-muted-foreground">Assisted verification — not automated certification</span>
-        <span className="text-xs text-accent font-500">4 active</span>
+        <span className="text-xs text-accent font-500">{projectScores.length} active</span>
       </div>
     </div>
   );
