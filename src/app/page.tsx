@@ -9,6 +9,7 @@ import ActivityFeed from './components/ActivityFeed';
 import AlertPanel from './components/AlertPanel';
 import DashboardHeaderActions from './components/DashboardHeaderActions';
 import GuidedTour from '@/components/GuidedTour';
+import { VarianceSummaryCard } from '@/app/variance-engine/page';
 import { useProject } from '@/contexts/ProjectContext';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -72,6 +73,8 @@ export default function DashboardPage() {
         <div id="tour-kpi-grid">
           <DashboardBentoGrid />
         </div>
+        {/* Daily Target Variance Card */}
+        <VarianceSummaryCard />
         {/* Charts row */}
         <div id="tour-charts">
           <DashboardCharts />

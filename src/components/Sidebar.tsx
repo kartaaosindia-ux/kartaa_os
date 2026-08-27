@@ -33,6 +33,9 @@ import {
   IndianRupee,
   Layers,
   Ruler,
+  UploadCloud,
+  ClipboardCheck,
+  Activity,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDemo } from '@/contexts/DemoContext';
@@ -62,6 +65,10 @@ const navItems: NavItem[] = [
   { id: 'nav-gis-map', label: 'GIS Map', href: '/gis-map', icon: <Map size={18} />, group: 'main', sectors: ['roads', 'industrial_railway'] },
   { id: 'nav-satellite', label: 'Satellite Monitor', href: '/satellite-monitor', icon: <Satellite size={18} />, group: 'main', sectors: ['roads', 'industrial_railway'] },
   { id: 'nav-sites', label: 'Site Map', href: '/gis-map', icon: <MapPin size={18} />, group: 'main' },
+  // DPR & Schedule group
+  { id: 'nav-master-plan', label: 'Master Plan Upload', href: '/master-plan', icon: <UploadCloud size={18} />, group: 'dpr' },
+  { id: 'nav-dpr-entry', label: 'DPR Entry', href: '/dpr-entry', icon: <ClipboardCheck size={18} />, group: 'dpr' },
+  { id: 'nav-variance-engine', label: 'Variance Engine', href: '/variance-engine', icon: <Activity size={18} />, group: 'dpr' },
   // Railway group
   { id: 'nav-railway-dashboard', label: 'Rail Dashboard', href: '/railway-dashboard', icon: <Train size={18} />, group: 'railway' },
   { id: 'nav-railway-dpr', label: 'Railway DPR', href: '/railway-dpr', icon: <FileText size={18} />, group: 'railway' },
@@ -90,13 +97,14 @@ const navItems: NavItem[] = [
 
 /** Groups visible per demo sector */
 const SECTOR_GROUPS: Record<string, string[]> = {
-  building: ['main', 'intelligence', 'admin'],
-  roads: ['main', 'intelligence', 'admin'],
-  industrial_railway: ['main', 'railway', 'intelligence', 'industrial', 'admin'],
+  building: ['main', 'dpr', 'intelligence', 'admin'],
+  roads: ['main', 'dpr', 'intelligence', 'admin'],
+  industrial_railway: ['main', 'dpr', 'railway', 'intelligence', 'industrial', 'admin'],
 };
 
 const groupLabels: Record<string, string> = {
   main: 'Project',
+  dpr: 'DPR & Schedule',
   railway: 'Railway',
   intelligence: 'Intelligence',
   industrial: 'Industrial',
@@ -113,7 +121,7 @@ export default function Sidebar({ currentPath = '/', onMobileClose }: SidebarPro
   const { signOut } = useAuth();
   const { isDemoUser, demoSector } = useDemo();
 
-  const allGroups = ['main', 'railway', 'intelligence', 'industrial', 'admin'];
+  const allGroups = ['main', 'dpr', 'railway', 'intelligence', 'industrial', 'admin'];
 
   // Determine which groups to show
   const visibleGroups = isDemoUser && demoSector
