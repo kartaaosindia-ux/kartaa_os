@@ -2,21 +2,32 @@
 
 import React from 'react';
 import { BOQ, BOQItem } from '@/lib/pdf-takeoff/types';
-import { Download, Printer } from 'lucide-react';
+import { Download, Printer, Copy, FileJson, FileSpreadsheet, File } from 'lucide-react';
+import {
+  downloadBOQPDF,
+  downloadBOQExcel,
+  downloadBOQJSON,
+  copyBOQToClipboard
+} from '@/lib/pdf-takeoff/export-utils';
 
 interface BOQViewerProps {
   boq: BOQ;
-  onExport?: (format: 'pdf' | 'excel' | 'json') => void;
 }
 
-export default function BOQViewer({ boq, onExport }: BOQViewerProps) {
+export default function BOQViewer({ boq }: BOQViewerProps) {
+  const [copied, setCopied] = React.useState(false);
+
   const handlePrint = () => {
     window.print();
   };
 
-  const handleExport = (format: 'pdf' | 'excel' | 'json') => {
-    if (onExport) {
-      onExport(format);
+  const handleCopy = async () => {
+    try {
+      await copyBOQToClipboard(boq);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (error) {
+      console.error('Failed to copy:', error);
     }
   };
 
@@ -96,27 +107,46 @@ export default function BOQViewer({ boq, onExport }: BOQViewerProps) {
       )}
 
       {/* Action Buttons */}
-      <div className="flex gap-4 justify-end border-t pt-6">
+      <div className="flex flex-wrap gap-3 justify-end border-t pt-6">
         <button
           onClick={handlePrint}
           className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+          title="Print BOQ"
         >
           <Printer className="w-4 h-4" />
           Print
         </button>
         <button
-          onClick={() => handleExport('excel')}
-          className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+          onClick={handleCopy}
+          className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+          title="Copy to clipboard"
         >
-          <Download className="w-4 h-4" />
-          Export to Excel
+          <Copy className="w-4 h-4" />
+          {copied ? 'Copied!' : 'Copy'}
         </button>
         <button
-          onClick={() => handleExport('pdf')}
-          className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+          onClick={() => downloadBOQJSON(boq)}
+          className="flex items-center gap-2 px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700 transition-colors"
+          title="Export as JSON"
         >
-          <Download className="w-4 h-4" />
-          Export to PDF
+          <FileJson className="w-4 h-4" />
+          JSON
+        </button>
+        <button
+          onClick={() => downloadBOQExcel(boq)}
+          className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+          title="Export as Excel"
+        >
+          <FileSpreadsheet className="w-4 h-4" />
+          Excel
+        </button>
+        <button
+          onClick={() => downloadBOQPDF(boq)}
+          className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+          title="Export as PDF"
+        >
+          <File className="w-4 h-4" />
+          PDF
         </button>
       </div>
     </div>
