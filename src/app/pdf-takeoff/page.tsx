@@ -3,27 +3,9 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import AppLayout from '@/components/AppLayout';
 import Topbar from '@/components/Topbar';
 import Link from 'next/link';
-import {
-  ArrowLeft,
-  Upload,
-  ZoomIn,
-  ZoomOut,
-  ChevronLeft,
-  ChevronRight,
-  Ruler,
-  Pentagon,
-  MapPin,
-  Settings2,
-  Trash2,
-  Link2,
-  Download,
-  RotateCcw,
-  Move,
-  CheckCircle2,
-  AlertCircle,
-  X,
-  FileText,
-} from 'lucide-react';
+import { generateBOQFromMeasurements } from '@/lib/pdf-takeoff/boq-generator';
+import type { UserMeasurement } from '@/lib/pdf-takeoff/types';
+import { ArrowLeft, Upload, ZoomIn, ZoomOut, ChevronLeft, ChevronRight, Ruler, Pentagon, MapPin, Settings2, Trash2, Link2, Download, RotateCcw, Move, CheckCircle2, AlertCircle, X, FileText,  } from 'lucide-react';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type ToolMode = 'pan' | 'scale' | 'linear' | 'area' | 'count';
@@ -711,12 +693,21 @@ export default function PdfTakeoffPage() {
               </div>
             )}
 
-            {/* Active tool hint */}
+            {/* Active tool hint + cancel in-progress */}
             {activeTool !== 'pan' && activeTool !== 'scale' && currentPoints.length > 0 && (
-              <div className="ml-auto text-xs text-muted-foreground bg-muted px-2 py-1 rounded-lg">
-                {activeTool === 'count'
-                  ? `${currentPoints.length} pins — double-click to commit`
-                  : `${currentPoints.length} pts — double-click to finish`}
+              <div className="ml-auto flex items-center gap-2">
+                <div className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded-lg">
+                  {activeTool === 'count'
+                    ? `${currentPoints.length} pins — double-click to commit`
+                    : `${currentPoints.length} pts — double-click to finish`}
+                </div>
+                <button
+                  onClick={() => setCurrentPoints([])}
+                  className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs text-destructive hover:bg-destructive/10 transition-colors border border-destructive/30"
+                  title="Cancel current measurement"
+                >
+                  <X size={11} /> Cancel
+                </button>
               </div>
             )}
 
@@ -821,11 +812,12 @@ export default function PdfTakeoffPage() {
               </div>
               {measurements.length > 0 && (
                 <button
-                  onClick={() => setMeasurements([])}
-                  className="p-1.5 rounded-lg hover:bg-destructive/10 transition-colors"
-                  title="Clear all"
+                  onClick={() => { setMeasurements([]); setCurrentPoints([]); }}
+                  className="flex items-center gap-1 p-1.5 rounded-lg hover:bg-destructive/10 transition-colors text-xs text-muted-foreground hover:text-destructive"
+                  title="Clear all measurements"
                 >
-                  <RotateCcw size={13} className="text-muted-foreground" />
+                  <RotateCcw size={13} />
+                  <span className="hidden sm:inline">Clear</span>
                 </button>
               )}
             </div>
@@ -926,6 +918,14 @@ export default function PdfTakeoffPage() {
           {/* Export footer */}
           {measurements.length > 0 && (
             <div className="px-4 py-3 border-t border-border flex-shrink-0 space-y-2">
+              {!scale && (
+                <div className="flex items-start gap-1.5 p-2 bg-warning/10 border border-warning/20 rounded-lg">
+                  <AlertCircle size={12} className="text-warning mt-0.5 flex-shrink-0" />
+                  <p className="text-2xs text-warning leading-tight">
+                    No scale set — quantities are in pixels. Use the Set Scale tool to calibrate before exporting.
+                  </p>
+                </div>
+              )}
               <div className="grid grid-cols-3 gap-2 text-center">
                 {(['linear', 'area', 'count'] as const).map(type => {
                   const items = measurements.filter(m => m.type === type);
@@ -942,8 +942,37 @@ export default function PdfTakeoffPage() {
                   );
                 })}
               </div>
-              <button className="w-full btn-secondary py-2 text-xs flex items-center justify-center gap-1.5">
-                <Download size={12} /> Export Quantities
+              <button
+                onClick={() => {
+                  const userMeasurements: UserMeasurement[] = measurements.map(m => ({
+                    id: m.id,
+                    type: m.type,
+                    label: m.label,
+                    value: m.value,
+                    unit: m.unit,
+                    sourcePage: currentPage,
+                    scaleDescription: scale
+                      ? `1 px = ${scale.ratio.toFixed(6)} ${scale.unit}`
+                      : 'No scale set (pixel values)',
+                    elementType: m.type,
+                    description: m.label,
+                  }));
+                  const boq = generateBOQFromMeasurements(
+                    userMeasurements,
+                    pdfFileName.replace(/\.pdf$/i, '') || 'Construction Project',
+                    ''
+                  );
+                  const blob = new Blob([JSON.stringify(boq, null, 2)], { type: 'application/json' });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  a.href = url;
+                  a.download = `BOQ_${pdfFileName.replace(/\.pdf$/i, '') || 'takeoff'}_${Date.now()}.json`;
+                  a.click();
+                  URL.revokeObjectURL(url);
+                }}
+                className="w-full btn-secondary py-2 text-xs flex items-center justify-center gap-1.5"
+              >
+                <Download size={12} /> Export BOQ (JSON)
               </button>
             </div>
           )}
