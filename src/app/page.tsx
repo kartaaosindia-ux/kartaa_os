@@ -28,7 +28,7 @@ export default function LandingPage() {
             Try Free
           </button>
           <Link
-            href="/app"
+            href="/dashboard"
             className="text-xs bg-[#c9a84c] text-black font-semibold px-4 py-2 rounded-lg hover:bg-[#d4b560] transition-colors"
           >
             Open Full App
@@ -66,7 +66,7 @@ export default function LandingPage() {
               <ArrowRight size={15} />
             </button>
             <Link
-              href="/app"
+              href="/dashboard"
               className="inline-flex items-center gap-2 bg-white/5 border border-white/10 text-white/80 font-medium text-sm px-6 py-3 rounded-xl hover:bg-white/10 transition-all"
             >
               Open Full App

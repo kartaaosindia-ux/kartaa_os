@@ -54,7 +54,7 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { id: 'nav-dashboard', label: 'Dashboard', href: '/', icon: <LayoutDashboard size={18} />, group: 'main' },
+  { id: 'nav-dashboard', label: 'Dashboard', href: '/dashboard', icon: <LayoutDashboard size={18} />, group: 'main' },
   { id: 'nav-projects', label: 'All Projects', href: '/projects', icon: <FolderKanban size={18} />, group: 'main' },
   { id: 'nav-project-setup', label: 'New Project', href: '/project-setup', icon: <Building2 size={18} />, group: 'main' },
   { id: 'nav-project-detail', label: 'Project Detail', href: '/project-detail', icon: <Building2 size={18} />, group: 'main' },

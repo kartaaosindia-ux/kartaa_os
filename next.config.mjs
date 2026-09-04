@@ -19,6 +19,16 @@ const nextConfig = {
     qualities: [75, 85, 100],
   },
 
+  async redirects() {
+    return [
+      {
+        source: '/app',
+        destination: '/dashboard',
+        permanent: false,
+      },
+    ];
+  },
+
   webpack(config, { dev }) {
 if (dev) {
     config.module.rules.push({
